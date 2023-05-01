@@ -11,7 +11,11 @@ import com.example.noteswithrestapi.R
 // Set of Material typography styles to start with
 val ud_digi_family = FontFamily(listOf(Font(R.font.ud_digi_kyokasho_nb, weight = FontWeight.Bold)))
 
-val roboto_family = FontFamily(listOf(Font(R.font.roboto_regular, weight = FontWeight.Normal)))
+val roboto_family = FontFamily(listOf(
+    Font(R.font.roboto_regular, weight = FontWeight.Normal),
+    Font(R.font.roboto_bold, weight = FontWeight.Bold),
+    Font(R.font.roboto_medium, weight = FontWeight.Medium)
+))
 
 val Typography = Typography(
     headlineMedium = TextStyle(
