@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Notes With REST API</string>
+    <string name="desc_leading_icon">Leading Icon</string>
 </resources>
