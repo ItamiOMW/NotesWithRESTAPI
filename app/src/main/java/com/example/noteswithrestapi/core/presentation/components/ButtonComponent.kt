@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.noteswithrestapi.core.ui.theme.NotesWithRESTAPITheme
+import com.example.noteswithrestapi.core.presentation.theme.ui.theme.NotesWithRESTAPITheme
 
 @Composable
 fun ButtonComponent(
@@ -31,7 +31,7 @@ fun ButtonComponent(
     leadingIcon: ImageVector? = null,
     backgroundColor: Color = MaterialTheme.colorScheme.secondary,
     contentColor: Color = MaterialTheme.colorScheme.onSecondary,
-    enabled: Boolean,
+    enabled: () -> Boolean,
     shape: Shape = MaterialTheme.shapes.large,
     onButtonClick: () -> Unit,
 ) {
@@ -43,7 +43,7 @@ fun ButtonComponent(
             contentColor = contentColor
         ),
         shape = shape,
-        enabled = enabled,
+        enabled = enabled(),
         contentPadding = PaddingValues(start = 32.dp, end = 40.dp, top = 14.dp, bottom = 14.dp),
         onClick = {
             onButtonClick()
@@ -58,17 +58,16 @@ fun ButtonComponent(
                 Icon(
                     imageVector = leadingIcon,
                     contentDescription = text,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(18.dp),
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(9.dp))
             Text(
                 text = text,
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
             )
         }
     }
-
 }
 
 @Preview(showBackground = false)
@@ -77,7 +76,7 @@ fun ButtonComponentPreview() {
     NotesWithRESTAPITheme(darkTheme = true) {
         ButtonComponent(
             text = "Login",
-            enabled = true,
+            enabled = { true },
             leadingIcon = Icons.Rounded.Login,
             onButtonClick = {}
         )

@@ -16,6 +16,7 @@ buildscript {
         okhttp_version = '5.0.0-alpha.3'
         accompanist_animation_version = '0.31.1-alpha'
         accompanist_systemui_controller_version = '0.27.0'
+        crypto_version = '1.1.0-alpha06'
     }
 }
 plugins {
