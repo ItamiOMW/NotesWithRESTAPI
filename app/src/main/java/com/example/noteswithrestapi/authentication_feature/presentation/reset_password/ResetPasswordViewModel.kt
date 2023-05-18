@@ -10,7 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.noteswithrestapi.R
 import com.example.noteswithrestapi.authentication_feature.domain.usecase.SendPasswordResetCodeUseCase
 import com.example.noteswithrestapi.core.domain.model.AppError
-import com.example.noteswithrestapi.core.domain.model.Response
+import com.example.noteswithrestapi.core.domain.model.AppResponse
+import com.example.noteswithrestapi.authentication_feature.domain.error.AuthenticationAppError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -52,12 +53,12 @@ class ResetPasswordViewModel @Inject constructor(
             resetPasswordState = resetPasswordState.copy(isLoading = true)
 
             when (val result = sendPasswordResetCodeUseCase(email)) {
-                is Response.Success -> {
+                is AppResponse.Success -> {
                     resetPasswordState = resetPasswordState.copy(isLoading = false)
                     _uiEvent.send(ResetPasswordUiEvent.OnResetCodeSentSuccessfully(email))
                 }
 
-                is Response.Failed -> {
+                is AppResponse.Failed -> {
                     resetPasswordState = resetPasswordState.copy(isLoading = false)
                     handleAppError(result.error)
                 }
@@ -68,45 +69,64 @@ class ResetPasswordViewModel @Inject constructor(
 
 
     private fun handleAppError(error: AppError) {
-        viewModelScope.launch {
-            when (error) {
-                is AppError.EmptyEmailError -> {
-                    resetPasswordState = resetPasswordState.copy(
-                        emailError = application.getString(R.string.error_empty_email),
-                    )
-                }
+        when (error) {
 
-                is AppError.GeneralError -> {
-                    resetPasswordState = resetPasswordState.copy(
-                        errorMessage = application.getString(error.messageResId),
-                    )
-                }
+            is AppError.ServerError -> {
+                resetPasswordState = resetPasswordState.copy(
+                    errorMessage = application.getString(R.string.error_server)
+                )
+            }
 
-                is AppError.InvalidEmailError -> {
-                    resetPasswordState = resetPasswordState.copy(
-                        emailError = application.getString(R.string.error_invalid_email),
-                    )
-                }
+            is AppError.PoorNetworkConnectionError -> {
+                resetPasswordState = resetPasswordState.copy(
+                    errorMessage = application.getString(R.string.error_poor_network_connection),
+                )
+            }
 
-                is AppError.PoorNetworkConnection -> {
-                    resetPasswordState = resetPasswordState.copy(
-                        errorMessage = application.getString(R.string.error_poor_network_connection),
-                    )
-                }
+            is AppError.GeneralError -> {
+                resetPasswordState = resetPasswordState.copy(
+                    errorMessage = application.getString(error.messageResId),
+                )
+            }
 
+            is AuthenticationAppError -> {
+                handleAuthAppError(error)
+            }
 
-                is AppError.UserDoesNotExist -> {
-                    resetPasswordState = resetPasswordState.copy(
-                        errorMessage = application.getString(R.string.error_user_does_not_exists),
-                    )
-                }
+            else -> {
+                resetPasswordState = resetPasswordState.copy(
+                    errorMessage = application.getString(R.string.error_unknown),
+                )
+                Log.e("UNEXPECTED_ERROR", error.toString())
+            }
+        }
+    }
 
-                else -> {
-                    resetPasswordState = resetPasswordState.copy(
-                        errorMessage = application.getString(R.string.error_unknown),
-                    )
-                    Log.e("UNEXPECTED_ERROR", error.toString())
-                }
+    private fun handleAuthAppError(error: AuthenticationAppError) {
+        when (error) {
+            is AuthenticationAppError.EmptyEmailError -> {
+                resetPasswordState = resetPasswordState.copy(
+                    emailError = application.getString(R.string.error_empty_email),
+                )
+            }
+
+            is AuthenticationAppError.InvalidEmailError -> {
+                resetPasswordState = resetPasswordState.copy(
+                    emailError = application.getString(R.string.error_invalid_email),
+                )
+            }
+
+            is AuthenticationAppError.UserDoesNotExist -> {
+                resetPasswordState = resetPasswordState.copy(
+                    errorMessage = application.getString(R.string.error_user_does_not_exists),
+                )
+            }
+
+            else -> {
+                resetPasswordState = resetPasswordState.copy(
+                    errorMessage = application.getString(R.string.error_unknown),
+                )
+                Log.e("UNEXPECTED_ERROR", error.toString())
             }
         }
     }

@@ -3,25 +3,25 @@ package com.example.noteswithrestapi.authentication_feature.domain.usecase
 import androidx.core.text.isDigitsOnly
 import com.example.noteswithrestapi.authentication_feature.domain.model.credentials.VerifyEmailCredentials
 import com.example.noteswithrestapi.authentication_feature.domain.repository.AuthenticationRepository
-import com.example.noteswithrestapi.core.domain.model.AppError
-import com.example.noteswithrestapi.core.domain.model.Response
+import com.example.noteswithrestapi.core.domain.model.AppResponse
+import com.example.noteswithrestapi.authentication_feature.domain.error.AuthenticationAppError
 import javax.inject.Inject
 
 class VerifyEmailUseCase @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
 ) {
 
-    suspend operator fun invoke(email: String, code: String): Response<Unit> {
+    suspend operator fun invoke(email: String, code: String): AppResponse<Unit> {
         if (email.isEmpty()) {
-            return Response.failed(AppError.EmptyEmailError)
+            return AppResponse.failed(AuthenticationAppError.EmptyEmailError)
         }
 
         if (code.length < 6) {
-            return Response.failed(AppError.InvalidVerificationCodeError)
+            return AppResponse.failed(AuthenticationAppError.InvalidVerificationCodeError)
         }
 
         if (!code.isDigitsOnly()) {
-            return Response.failed(AppError.InvalidVerificationCodeError)
+            return AppResponse.failed(AuthenticationAppError.InvalidVerificationCodeError)
         }
 
         val verifyEmailCredentials = VerifyEmailCredentials(email, code)

@@ -31,6 +31,7 @@ fun ButtonComponent(
     leadingIcon: ImageVector? = null,
     backgroundColor: Color = MaterialTheme.colorScheme.secondary,
     contentColor: Color = MaterialTheme.colorScheme.onSecondary,
+    contentPadding: PaddingValues = PaddingValues(start = 32.dp, end = 40.dp, top = 14.dp, bottom = 14.dp),
     enabled: () -> Boolean,
     shape: Shape = MaterialTheme.shapes.large,
     onButtonClick: () -> Unit,
@@ -44,7 +45,7 @@ fun ButtonComponent(
         ),
         shape = shape,
         enabled = enabled(),
-        contentPadding = PaddingValues(start = 32.dp, end = 40.dp, top = 14.dp, bottom = 14.dp),
+        contentPadding = contentPadding,
         onClick = {
             onButtonClick()
         },
@@ -60,8 +61,8 @@ fun ButtonComponent(
                     contentDescription = text,
                     modifier = Modifier.size(18.dp),
                 )
+                Spacer(modifier = Modifier.width(9.dp))
             }
-            Spacer(modifier = Modifier.width(9.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)

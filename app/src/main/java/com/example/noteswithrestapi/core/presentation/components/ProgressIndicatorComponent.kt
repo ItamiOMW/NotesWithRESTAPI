@@ -17,7 +17,7 @@ fun ProgressIndicatorComponent(
     if (isLoading()) {
         CircularProgressIndicator(
             modifier = modifier,
-            color = MaterialTheme.colorScheme.primary
+            color = color
         )
     }
 

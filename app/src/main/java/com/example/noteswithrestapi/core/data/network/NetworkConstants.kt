@@ -1,4 +1,4 @@
-package com.example.noteswithrestapi.core.network
+package com.example.noteswithrestapi.core.data.network
 
 object NetworkConstants {
 

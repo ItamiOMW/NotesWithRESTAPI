@@ -32,7 +32,19 @@ sealed class Screen(protected val route: String, vararg params: String) {
     //Note feature
     object Notes: Screen(NOTES_SCREEN_ROUTE)
 
-    object AddEditNote: Screen(ADD_EDIT_NOTE_SCREEN_ROUTE)
+    object AddNote: Screen(ADD_NOTE_SCREEN_ROUTE)
+
+    object EditNote: Screen(EDIT_NOTE_SCREEN_ROUTE, NOTE_ID_ARG) {
+        fun getRouteWithArgs(noteId: Int) = route.appendParams(
+            NOTE_ID_ARG to noteId
+        )
+    }
+
+    object SearchNote: Screen(SEARCH_NOTE_SCREEN_ROUTE)
+
+
+    //Profile feature
+    object Profile: Screen(PROFILE_SCREEN_ROUTE)
 
 
     companion object {
@@ -48,7 +60,16 @@ sealed class Screen(protected val route: String, vararg params: String) {
 
         //Note feature
         private const val NOTES_SCREEN_ROUTE = "notes"
-        private const val ADD_EDIT_NOTE_SCREEN_ROUTE = "notes"
+        private const val EDIT_NOTE_SCREEN_ROUTE = "edit_notes"
+        private const val ADD_NOTE_SCREEN_ROUTE = "add_note"
+        private const val SEARCH_NOTE_SCREEN_ROUTE = "search_note"
+        private const val SEARCH_NOTE_RESULT_SCREEN_ROUTE = "search_note_result"
+
+        const val NOTE_ID_ARG = "note_id_arg"
+
+
+        //Profile feature
+        private const val PROFILE_SCREEN_ROUTE = "profile"
 
     }
 
