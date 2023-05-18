@@ -11,7 +11,8 @@ import com.example.noteswithrestapi.R
 import com.example.noteswithrestapi.authentication_feature.domain.usecase.IsLoggedInUseCase
 import com.example.noteswithrestapi.authentication_feature.domain.usecase.LoginUseCase
 import com.example.noteswithrestapi.core.domain.model.AppError
-import com.example.noteswithrestapi.core.domain.model.Response
+import com.example.noteswithrestapi.core.domain.model.AppResponse
+import com.example.noteswithrestapi.authentication_feature.domain.error.AuthenticationAppError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -36,16 +37,16 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             loginState = loginState.copy(isLoading = true)
             when (val result = isLoggedInUseCase()) {
-                is Response.Success -> {
+                is AppResponse.Success -> {
                     loginState = loginState.copy(isLoading = false)
                     if (result.data) {
                         _uiEvent.send(LoginUiEvent.SuccessfullyLoggedIn)
                     }
                 }
 
-                is Response.Failed -> {
+                is AppResponse.Failed -> {
                     loginState = loginState.copy(isLoading = false)
-                    if (result.error is AppError.PoorNetworkConnection) {
+                    if (result.error is AppError.PoorNetworkConnectionError) {
                         loginState = loginState.copy(
                             isLoading = false,
                             errorMessage = application.getString(R.string.error_poor_network_connection)
@@ -84,12 +85,12 @@ class LoginViewModel @Inject constructor(
             loginState = loginState.copy(isLoading = true)
 
             when (val result = loginUseCase(email, password)) {
-                is Response.Success -> {
+                is AppResponse.Success -> {
                     loginState = loginState.copy(isLoading = false, errorMessage = null)
                     _uiEvent.send(LoginUiEvent.SuccessfullyLoggedIn)
                 }
 
-                is Response.Failed -> {
+                is AppResponse.Failed -> {
                     loginState = loginState.copy(isLoading = false, errorMessage = null)
                     handleAppError(result.error)
                 }
@@ -99,61 +100,84 @@ class LoginViewModel @Inject constructor(
 
 
     private fun handleAppError(error: AppError) {
-        viewModelScope.launch {
-            when (error) {
-                is AppError.PoorNetworkConnection -> {
-                    loginState = loginState.copy(
-                        errorMessage = application.getString(R.string.error_poor_network_connection),
-                    )
-                }
+        when (error) {
 
-                is AppError.GeneralError -> {
-                    loginState = loginState.copy(
-                        errorMessage = application.getString(error.messageResId),
-                    )
-                }
+            is AppError.ServerError -> {
+                loginState = loginState.copy(
+                    errorMessage = application.getString(R.string.error_server)
+                )
+            }
 
-                is AppError.EmailNotVerifiedError -> {
+            is AppError.PoorNetworkConnectionError -> {
+                loginState = loginState.copy(
+                    errorMessage = application.getString(R.string.error_poor_network_connection),
+                )
+            }
+
+            is AppError.GeneralError -> {
+                loginState = loginState.copy(
+                    errorMessage = application.getString(error.messageResId),
+                )
+            }
+
+            is AuthenticationAppError -> {
+                handleAuthAppError(error)
+            }
+
+            else -> {
+                loginState = loginState.copy(
+                    errorMessage = application.getString(R.string.error_unknown),
+                )
+                Log.e("UNEXPECTED_ERROR", error.toString())
+            }
+
+        }
+    }
+
+
+    private fun handleAuthAppError(error: AuthenticationAppError) {
+        when (error) {
+            is AuthenticationAppError.EmailNotVerifiedError -> {
+                viewModelScope.launch {
                     _uiEvent.send(LoginUiEvent.EmailNotVerified(loginState.emailInput))
                 }
+            }
 
-                is AppError.InvalidEmailOrPasswordError -> {
-                    loginState = loginState.copy(
-                        errorMessage = application.getString(R.string.error_invalid_email_or_password),
-                    )
-                }
+            is AuthenticationAppError.InvalidEmailOrPasswordError -> {
+                loginState = loginState.copy(
+                    errorMessage = application.getString(R.string.error_invalid_email_or_password),
+                )
+            }
 
-                is AppError.EmptyEmailError -> {
-                    loginState = loginState.copy(
-                        emailErrorMessage = application.getString(R.string.error_empty_email)
-                    )
-                }
+            is AuthenticationAppError.EmptyEmailError -> {
+                loginState = loginState.copy(
+                    emailErrorMessage = application.getString(R.string.error_empty_email)
+                )
+            }
 
-                is AppError.EmptyPasswordError -> {
-                    loginState = loginState.copy(
-                        passwordErrorMessage = application.getString(R.string.error_empty_password)
-                    )
-                }
+            is AuthenticationAppError.EmptyPasswordError -> {
+                loginState = loginState.copy(
+                    passwordErrorMessage = application.getString(R.string.error_empty_password)
+                )
+            }
 
-                is AppError.InvalidEmailError -> {
-                    loginState = loginState.copy(
-                        emailErrorMessage = application.getString(R.string.error_invalid_email)
-                    )
-                }
+            is AuthenticationAppError.InvalidEmailError -> {
+                loginState = loginState.copy(
+                    emailErrorMessage = application.getString(R.string.error_invalid_email)
+                )
+            }
 
-                is AppError.ShortPasswordError -> {
-                    loginState = loginState.copy(
-                        passwordErrorMessage = application.getString(R.string.error_short_password)
-                    )
-                }
+            is AuthenticationAppError.ShortPasswordError -> {
+                loginState = loginState.copy(
+                    passwordErrorMessage = application.getString(R.string.error_short_password)
+                )
+            }
 
-                else -> {
-                    loginState = loginState.copy(
-                        errorMessage = application.getString(R.string.error_unknown),
-                    )
-                    Log.e("UNEXPECTED_ERROR", error.toString())
-                }
-
+            else -> {
+                loginState = loginState.copy(
+                    errorMessage = application.getString(R.string.error_unknown),
+                )
+                Log.e("UNEXPECTED_ERROR", error.toString())
             }
         }
     }

@@ -1,12 +1,13 @@
 package com.example.noteswithrestapi.core.domain.model
 
-sealed class Response<out T> {
+
+sealed class AppResponse<out T> {
 
     //Success state
-    data class Success<T>(val data: T) : Response<T>()
+    data class Success<T>(val data: T) : AppResponse<T>()
 
     //Failed state
-    data class Failed<T>(val error: AppError) : Response<T>()
+    data class Failed<T>(val error: AppError) : AppResponse<T>()
 
 
     companion object {

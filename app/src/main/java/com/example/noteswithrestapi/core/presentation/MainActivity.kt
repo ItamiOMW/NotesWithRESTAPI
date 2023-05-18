@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material3.MaterialTheme
 import com.example.noteswithrestapi.authentication_feature.data.repository.AuthenticationRepositoryImpl
-import com.example.noteswithrestapi.core.presentation.navigation.RootNavGraph
 import com.example.noteswithrestapi.core.presentation.theme.ui.theme.NotesWithRESTAPITheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -28,7 +27,7 @@ class MainActivity : ComponentActivity() {
                     this.setSystemBarsColor(MaterialTheme.colorScheme.surface)
                 }
                 val navController = rememberAnimatedNavController()
-                RootNavGraph(navController = navController)
+                MainScreen(navController = navController)
             }
         }
     }

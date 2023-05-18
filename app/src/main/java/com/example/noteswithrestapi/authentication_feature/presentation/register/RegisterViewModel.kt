@@ -10,7 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.noteswithrestapi.R
 import com.example.noteswithrestapi.authentication_feature.domain.usecase.RegisterUseCase
 import com.example.noteswithrestapi.core.domain.model.AppError
-import com.example.noteswithrestapi.core.domain.model.Response
+import com.example.noteswithrestapi.core.domain.model.AppResponse
+import com.example.noteswithrestapi.authentication_feature.domain.error.AuthenticationAppError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -81,12 +82,12 @@ class RegisterViewModel @Inject constructor(
             registerState = registerState.copy(isLoading = true)
 
             when (val result = registerUseCase(email, password, confirmPassword)) {
-                is Response.Success -> {
+                is AppResponse.Success -> {
                     registerState = registerState.copy(isLoading = false)
                     _uiEvent.send(RegisterUiEvent.OnRegisterSuccessful(email))
                 }
 
-                is Response.Failed -> {
+                is AppResponse.Failed -> {
                     registerState = registerState.copy(isLoading = false, errorMessage = null)
                     handleAppError(result.error)
                 }
@@ -97,68 +98,89 @@ class RegisterViewModel @Inject constructor(
 
 
     private fun handleAppError(error: AppError) {
-        viewModelScope.launch {
-            when (error) {
-                is AppError.EmptyEmailError -> {
-                    registerState = registerState.copy(
-                        emailErrorMessage = application.getString(R.string.error_empty_email)
-                    )
-                }
+        when (error) {
 
-                is AppError.EmptyPasswordError -> {
-                    registerState = registerState.copy(
-                        passwordErrorMessage = application.getString(R.string.error_empty_password)
-                    )
-                }
+            is AppError.ServerError -> {
+                registerState = registerState.copy(
+                    errorMessage = application.getString(R.string.error_server)
+                )
+            }
 
-                is AppError.EmptyRepeatPasswordError -> {
-                    registerState = registerState.copy(
-                        confirmPasswordErrorMessage = application.getString(R.string.error_empty_password)
-                    )
-                }
+            is AppError.GeneralError -> {
+                registerState = registerState.copy(
+                    errorMessage = application.getString(error.messageResId)
+                )
+            }
 
-                is AppError.GeneralError -> {
-                    registerState = registerState.copy(
-                        errorMessage = application.getString(error.messageResId)
-                    )
-                }
+            is AppError.PoorNetworkConnectionError -> {
+                registerState = registerState.copy(
+                    errorMessage = application.getString(R.string.error_poor_network_connection)
+                )
+            }
 
-                is AppError.InvalidEmailError -> {
-                    registerState = registerState.copy(
-                        emailErrorMessage = application.getString(R.string.error_invalid_email)
-                    )
-                }
+            is AuthenticationAppError -> {
+                handleAuthAppError(error)
+            }
 
-                is AppError.PasswordsDoNotMatchError -> {
-                    registerState = registerState.copy(
-                        errorMessage = application.getString(R.string.error_passwords_do_not_march),
-                    )
-                }
+            else -> {
+                registerState = registerState.copy(
+                    errorMessage = application.getString(R.string.error_unknown),
+                )
+                Log.e("UNEXPECTED_ERROR", error.toString())
+            }
+        }
+    }
 
-                is AppError.PoorNetworkConnection -> {
-                    registerState = registerState.copy(
-                        errorMessage = application.getString(R.string.error_poor_network_connection)
-                    )
-                }
+    private fun handleAuthAppError(error: AuthenticationAppError) {
+        when (error) {
+            is AuthenticationAppError.EmptyEmailError -> {
+                registerState = registerState.copy(
+                    emailErrorMessage = application.getString(R.string.error_empty_email)
+                )
+            }
 
-                is AppError.ShortPasswordError -> {
-                    registerState = registerState.copy(
-                        passwordErrorMessage = application.getString(R.string.error_short_password)
-                    )
-                }
+            is AuthenticationAppError.EmptyPasswordError -> {
+                registerState = registerState.copy(
+                    passwordErrorMessage = application.getString(R.string.error_empty_password)
+                )
+            }
 
-                is AppError.UserAlreadyExist -> {
-                    registerState = registerState.copy(
-                        errorMessage = application.getString(R.string.error_user_exists)
-                    )
-                }
+            is AuthenticationAppError.EmptyRepeatPasswordError -> {
+                registerState = registerState.copy(
+                    confirmPasswordErrorMessage = application.getString(R.string.error_empty_password)
+                )
+            }
 
-                else -> {
-                    registerState = registerState.copy(
-                        errorMessage = application.getString(R.string.error_unknown),
-                    )
-                    Log.e("UNEXPECTED_ERROR", error.toString())
-                }
+            is AuthenticationAppError.InvalidEmailError -> {
+                registerState = registerState.copy(
+                    emailErrorMessage = application.getString(R.string.error_invalid_email)
+                )
+            }
+
+            is AuthenticationAppError.PasswordsDoNotMatchError -> {
+                registerState = registerState.copy(
+                    errorMessage = application.getString(R.string.error_passwords_do_not_march),
+                )
+            }
+
+
+            is AuthenticationAppError.ShortPasswordError -> {
+                registerState = registerState.copy(
+                    passwordErrorMessage = application.getString(R.string.error_short_password)
+                )
+            }
+
+            is AuthenticationAppError.UserAlreadyExist -> {
+                registerState = registerState.copy(
+                    errorMessage = application.getString(R.string.error_user_exists)
+                )
+            }
+
+            else -> {
+                registerState = registerState.copy(
+                    errorMessage = application.getString(R.string.error_unknown),
+                )
+                Log.e("UNEXPECTED_ERROR", error.toString())
             }
         }
     }

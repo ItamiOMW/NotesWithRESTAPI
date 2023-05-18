@@ -1,6 +1,6 @@
 package com.example.noteswithrestapi.core.domain.model
 
-sealed class AppError(
+open class AppError(
     message: String? = null,
     cause: Exception? = null
 ): Error(message, cause) {
@@ -8,34 +8,17 @@ sealed class AppError(
     //Common Errors
     data class GeneralError(val messageResId: Int): AppError()
 
-    object PoorNetworkConnection: AppError()
+    object PoorNetworkConnectionError: AppError()
 
     object ServerError: AppError()
 
-    object InvalidCredentials: AppError()
+    object InvalidCredentialsError: AppError()
 
+    object NotFoundError: AppError()
 
-    //Authentication errors
-    object EmptyEmailError: AppError()
+    object UnauthorizedError: AppError()
 
-    object EmptyPasswordError: AppError()
+    object ForbiddenError: AppError()
 
-    object EmptyRepeatPasswordError: AppError()
-
-    object InvalidEmailOrPasswordError: AppError()
-
-    object InvalidVerificationCodeError: AppError()
-
-    object PasswordsDoNotMatchError: AppError()
-
-    object ShortPasswordError: AppError()
-
-    object UserAlreadyExist: AppError()
-
-    object UserDoesNotExist: AppError()
-
-    object InvalidEmailError: AppError()
-
-    object EmailNotVerifiedError: AppError()
 
 }

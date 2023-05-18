@@ -2,7 +2,7 @@ package com.example.noteswithrestapi.core.di
 
 import com.example.noteswithrestapi.core.data.token.TokenManager
 import com.example.noteswithrestapi.core.data.token.TokenManagerEncryptedSharedPreferences
-import com.example.noteswithrestapi.core.network.NetworkConstants
+import com.example.noteswithrestapi.core.data.network.NetworkConstants
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

@@ -12,7 +12,8 @@ import com.example.noteswithrestapi.R
 import com.example.noteswithrestapi.authentication_feature.domain.usecase.ConfirmPasswordResetUseCase
 import com.example.noteswithrestapi.authentication_feature.domain.usecase.SendPasswordResetCodeUseCase
 import com.example.noteswithrestapi.core.domain.model.AppError
-import com.example.noteswithrestapi.core.domain.model.Response
+import com.example.noteswithrestapi.core.domain.model.AppResponse
+import com.example.noteswithrestapi.authentication_feature.domain.error.AuthenticationAppError
 import com.example.noteswithrestapi.core.presentation.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -70,7 +71,8 @@ class ConfirmPasswordResetViewModel @Inject constructor(
             }
 
             is ConfirmPasswordResetEvent.OnConfirmPasswordInputValueChange -> {
-                state = state.copy(confirmPasswordInput = event.newValue, confirmPasswordError = null)
+                state =
+                    state.copy(confirmPasswordInput = event.newValue, confirmPasswordError = null)
             }
 
             is ConfirmPasswordResetEvent.OnPasswordInputValueChange -> {
@@ -88,12 +90,12 @@ class ConfirmPasswordResetViewModel @Inject constructor(
         viewModelScope.launch {
             state = state.copy(isLoading = true)
             when (val result = sendPasswordResetCodeUseCase(email)) {
-                is Response.Success -> {
+                is AppResponse.Success -> {
                     state = state.copy(isLoading = false)
                     _uiEvent.send(ConfirmPasswordResetUiEvent.ShowSnackbar(application.getString(R.string.text_code_resent)))
                 }
 
-                is Response.Failed -> {
+                is AppResponse.Failed -> {
                     state = state.copy(isLoading = false)
                     handleAppError(result.error)
                 }
@@ -116,12 +118,12 @@ class ConfirmPasswordResetViewModel @Inject constructor(
                 confirmNewPassword,
                 code
             )) {
-                is Response.Success -> {
+                is AppResponse.Success -> {
                     state = state.copy(isLoading = false, errorMessage = null)
                     _uiEvent.send(ConfirmPasswordResetUiEvent.OnConfirmPasswordResetSuccess)
                 }
 
-                is Response.Failed -> {
+                is AppResponse.Failed -> {
                     state = state.copy(isLoading = false, errorMessage = null)
                     handleAppError(result.error)
                 }
@@ -133,15 +135,10 @@ class ConfirmPasswordResetViewModel @Inject constructor(
     private fun handleAppError(error: AppError) {
         viewModelScope.launch {
             when (error) {
-                is AppError.EmptyPasswordError -> {
-                    state = state.copy(
-                        passwordError = application.getString(R.string.error_empty_password)
-                    )
-                }
 
-                is AppError.EmptyRepeatPasswordError -> {
+                is AppError.ServerError -> {
                     state = state.copy(
-                        confirmPasswordError = application.getString(R.string.error_empty_password)
+                        errorMessage = application.getString(R.string.error_server)
                     )
                 }
 
@@ -151,29 +148,14 @@ class ConfirmPasswordResetViewModel @Inject constructor(
                     )
                 }
 
-                is AppError.InvalidVerificationCodeError -> {
-                    state = state.copy(
-                        errorMessage = application.getString(R.string.error_invalid_verification_code)
-                    )
-                }
-
-                is AppError.PasswordsDoNotMatchError -> {
-                    state = state.copy(
-                        passwordError = application.getString(R.string.error_passwords_do_not_march),
-                        confirmPasswordError = application.getString(R.string.error_passwords_do_not_march)
-                    )
-                }
-
-                is AppError.PoorNetworkConnection -> {
+                is AppError.PoorNetworkConnectionError -> {
                     state = state.copy(
                         errorMessage = application.getString(R.string.error_poor_network_connection)
                     )
                 }
 
-                is AppError.ShortPasswordError -> {
-                    state = state.copy(
-                        passwordError = application.getString(R.string.error_short_password)
-                    )
+                is AuthenticationAppError -> {
+                    handleAuthAppError(error)
                 }
 
                 else -> {
@@ -182,6 +164,48 @@ class ConfirmPasswordResetViewModel @Inject constructor(
                     )
                     Log.e("UNKNOWN_ERROR", error.toString())
                 }
+            }
+        }
+    }
+
+    private fun handleAuthAppError(error: AuthenticationAppError) {
+        when (error) {
+            is AuthenticationAppError.EmptyPasswordError -> {
+                state = state.copy(
+                    passwordError = application.getString(R.string.error_empty_password)
+                )
+            }
+
+            is AuthenticationAppError.EmptyRepeatPasswordError -> {
+                state = state.copy(
+                    confirmPasswordError = application.getString(R.string.error_empty_password)
+                )
+            }
+
+            is AuthenticationAppError.InvalidVerificationCodeError -> {
+                state = state.copy(
+                    errorMessage = application.getString(R.string.error_invalid_verification_code)
+                )
+            }
+
+            is AuthenticationAppError.PasswordsDoNotMatchError -> {
+                state = state.copy(
+                    passwordError = application.getString(R.string.error_passwords_do_not_march),
+                    confirmPasswordError = application.getString(R.string.error_passwords_do_not_march)
+                )
+            }
+
+            is AuthenticationAppError.ShortPasswordError -> {
+                state = state.copy(
+                    passwordError = application.getString(R.string.error_short_password)
+                )
+            }
+
+            else -> {
+                state = state.copy(
+                    errorMessage = application.getString(R.string.error_unknown)
+                )
+                Log.e("UNKNOWN_ERROR", error.toString())
             }
         }
     }

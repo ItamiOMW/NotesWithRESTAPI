@@ -12,7 +12,8 @@ import com.example.noteswithrestapi.R
 import com.example.noteswithrestapi.authentication_feature.domain.usecase.ResendEmailVerificationCodeUseCase
 import com.example.noteswithrestapi.authentication_feature.domain.usecase.VerifyEmailUseCase
 import com.example.noteswithrestapi.core.domain.model.AppError
-import com.example.noteswithrestapi.core.domain.model.Response
+import com.example.noteswithrestapi.core.domain.model.AppResponse
+import com.example.noteswithrestapi.authentication_feature.domain.error.AuthenticationAppError
 import com.example.noteswithrestapi.core.presentation.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -70,12 +71,12 @@ class VerifyEmailViewModel @Inject constructor(
             verifyEmailState = verifyEmailState.copy(isLoading = true)
 
             when (val result = verifyEmailUseCase(email, code)) {
-                is Response.Success -> {
+                is AppResponse.Success -> {
                     verifyEmailState = verifyEmailState.copy(isLoading = false)
                     _uiEvent.send(VerifyEmailUiEvent.OnEmailVerifiedSuccessfully)
                 }
 
-                is Response.Failed -> {
+                is AppResponse.Failed -> {
                     verifyEmailState = verifyEmailState.copy(isLoading = false)
                     handleAppError(result.error)
                 }
@@ -88,12 +89,12 @@ class VerifyEmailViewModel @Inject constructor(
         verifyEmailState = verifyEmailState.copy(isLoading = true)
         viewModelScope.launch {
             when (val result = resendEmailVerificationCodeUseCase(email)) {
-                is Response.Success -> {
+                is AppResponse.Success -> {
                     verifyEmailState = verifyEmailState.copy(isLoading = false, codeError = null)
                     _uiEvent.send(VerifyEmailUiEvent.ShowSnackbar(application.getString(R.string.text_code_resent)))
                 }
 
-                is Response.Failed -> {
+                is AppResponse.Failed -> {
                     verifyEmailState = verifyEmailState.copy(isLoading = false, codeError = null)
                     handleAppError(result.error)
                 }
@@ -103,32 +104,51 @@ class VerifyEmailViewModel @Inject constructor(
 
 
     private fun handleAppError(error: AppError) {
-        viewModelScope.launch {
-            when (error) {
-                is AppError.GeneralError -> {
-                    verifyEmailState = verifyEmailState.copy(
-                        codeError = application.getString(error.messageResId)
-                    )
-                }
+        when (error) {
+            is AppError.GeneralError -> {
+                verifyEmailState = verifyEmailState.copy(
+                    codeError = application.getString(error.messageResId)
+                )
+            }
 
-                is AppError.InvalidVerificationCodeError -> {
-                    verifyEmailState = verifyEmailState.copy(
-                        codeError = application.getString(R.string.error_invalid_verification_code)
-                    )
-                }
+            is AppError.PoorNetworkConnectionError -> {
+                verifyEmailState = verifyEmailState.copy(
+                    codeError = application.getString(R.string.error_poor_network_connection)
+                )
+            }
 
-                is AppError.PoorNetworkConnection -> {
-                    verifyEmailState = verifyEmailState.copy(
-                        codeError = application.getString(R.string.error_poor_network_connection)
-                    )
-                }
+            is AppError.ServerError -> {
+                verifyEmailState = verifyEmailState.copy(
+                    codeError = application.getString(R.string.error_server)
+                )
+            }
 
-                else -> {
-                    verifyEmailState = verifyEmailState.copy(
-                        codeError = application.getString(R.string.error_unknown)
-                    )
-                    Log.e("UNKNOWN_ERROR", error.toString())
-                }
+            is AuthenticationAppError -> {
+                handleAuthAppError(error)
+            }
+
+            else -> {
+                verifyEmailState = verifyEmailState.copy(
+                    codeError = application.getString(R.string.error_unknown)
+                )
+                Log.e("UNKNOWN_ERROR", error.toString())
+            }
+        }
+    }
+
+    private fun handleAuthAppError(error: AuthenticationAppError) {
+        when (error) {
+            is AuthenticationAppError.InvalidVerificationCodeError -> {
+                verifyEmailState = verifyEmailState.copy(
+                    codeError = application.getString(R.string.error_invalid_verification_code)
+                )
+            }
+
+            else -> {
+                verifyEmailState = verifyEmailState.copy(
+                    codeError = application.getString(R.string.error_unknown)
+                )
+                Log.e("UNKNOWN_ERROR", error.toString())
             }
         }
     }

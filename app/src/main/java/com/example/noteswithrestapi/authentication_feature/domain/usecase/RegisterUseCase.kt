@@ -2,8 +2,8 @@ package com.example.noteswithrestapi.authentication_feature.domain.usecase
 
 import com.example.noteswithrestapi.authentication_feature.domain.model.credentials.RegisterCredentials
 import com.example.noteswithrestapi.authentication_feature.domain.repository.AuthenticationRepository
-import com.example.noteswithrestapi.core.domain.model.AppError
-import com.example.noteswithrestapi.core.domain.model.Response
+import com.example.noteswithrestapi.core.domain.model.AppResponse
+import com.example.noteswithrestapi.authentication_feature.domain.error.AuthenticationAppError
 import javax.inject.Inject
 
 class RegisterUseCase @Inject constructor(
@@ -14,21 +14,21 @@ class RegisterUseCase @Inject constructor(
         email: String,
         password: String,
         confirmPassword: String,
-    ): Response<Unit> {
+    ): AppResponse<Unit> {
         if (email.isEmpty()) {
-            return Response.failed(AppError.EmptyEmailError)
+            return AppResponse.failed(AuthenticationAppError.EmptyEmailError)
         }
         if (password.isEmpty()) {
-            return Response.failed(AppError.EmptyPasswordError)
+            return AppResponse.failed(AuthenticationAppError.EmptyPasswordError)
         }
         if (confirmPassword.isEmpty()) {
-            return Response.failed(AppError.EmptyRepeatPasswordError)
+            return AppResponse.failed(AuthenticationAppError.EmptyRepeatPasswordError)
         }
         if (password.count() < 8) {
-            return Response.failed(AppError.ShortPasswordError)
+            return AppResponse.failed(AuthenticationAppError.ShortPasswordError)
         }
         if (password != confirmPassword) {
-            return Response.failed(AppError.PasswordsDoNotMatchError)
+            return AppResponse.failed(AuthenticationAppError.PasswordsDoNotMatchError)
         }
 
         val registerCredentials = RegisterCredentials(email, password, confirmPassword)
