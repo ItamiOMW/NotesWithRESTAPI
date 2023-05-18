@@ -51,7 +51,11 @@ fun MainScreen(
         content = {
             RootNavGraph(
                 navController = navController,
-                drawerState = drawerState
+                onShowNavigationDrawer = {
+                    scope.launch {
+                        drawerState.open()
+                    }
+                }
             )
         }
     )

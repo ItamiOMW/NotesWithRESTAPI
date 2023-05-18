@@ -12,8 +12,6 @@ interface AuthenticationRepository {
 
     suspend fun login(loginCredentials: LoginCredentials): AppResponse<String> //Return token
 
-    suspend fun logout(): AppResponse<Unit>
-
     suspend fun isLoggedIn(): AppResponse<Boolean>
 
     suspend fun register(registerCredentials: RegisterCredentials): AppResponse<Unit>
