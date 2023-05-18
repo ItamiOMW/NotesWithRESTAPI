@@ -4,7 +4,6 @@ import com.example.noteswithrestapi.authentication_feature.data.remote.dto.Email
 import com.example.noteswithrestapi.authentication_feature.data.remote.dto.EmailVerificationResultDto
 import com.example.noteswithrestapi.authentication_feature.data.remote.dto.IsAuthenticatedResultDto
 import com.example.noteswithrestapi.authentication_feature.data.remote.dto.LoginResultDto
-import com.example.noteswithrestapi.authentication_feature.data.remote.dto.LogoutResultDto
 import com.example.noteswithrestapi.authentication_feature.data.remote.dto.RegisterResultDto
 import com.example.noteswithrestapi.authentication_feature.data.remote.dto.ResetPasswordConfirmResultDto
 import com.example.noteswithrestapi.authentication_feature.data.remote.dto.ResetPasswordResultDto
@@ -16,7 +15,6 @@ import com.example.noteswithrestapi.authentication_feature.domain.model.credenti
 import com.example.noteswithrestapi.authentication_feature.domain.model.credentials.VerifyEmailCredentials
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AccountsApiService {
@@ -31,12 +29,6 @@ interface AccountsApiService {
     suspend fun isAuthenticated(
         @Body token: String,
     ): Response<IsAuthenticatedResultDto>
-
-
-    @POST("accounts/logout/")
-    suspend fun logout(
-        @Header("Authorization") token: String
-    ): Response<LogoutResultDto>
 
 
     @POST("accounts/register/")
@@ -67,7 +59,6 @@ interface AccountsApiService {
     suspend fun passwordResetConfirm(
         @Body passwordResetConfirmCredentials: PasswordResetConfirmCredentials,
     ): Response<ResetPasswordConfirmResultDto>
-
 
 
 }

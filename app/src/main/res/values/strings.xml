@@ -7,6 +7,7 @@
     <string name="error_send_password_reset_failed">Failed to send password reset code</string>
     <string name="error_password_reset_failed">Failed to reset password</string>
     <string name="error_logout_failed">Failed to logout</string>
+    <string name="error_get_user_failed">Failed to get user</string>
     <string name="error_register_failed">Failed to register</string>
     <string name="error_unknown">Unknown error occurred</string>
     <string name="desc_sign_in_illustration">Sign in illustration</string>
@@ -69,4 +70,6 @@
     <string name="desc_delete_icon">Delete icon</string>
     <string name="hint_search_notes">Search notes</string>
     <string name="desc_clear_query_icon">Clear query icon</string>
+    <string name="title_logout">Logout</string>
+    <string name="text_joined_at_with_param">Joined at %s</string>
 </resources>

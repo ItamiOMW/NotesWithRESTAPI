@@ -44,26 +44,6 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun logout(): AppResponse<Unit> {
-        try {
-            val token = tokenManager.authToken ?: return AppResponse.Success(Unit)
-            val result = accountsApiService.logout("Token $token")
-
-            if (result.isSuccessful) {
-                tokenManager.removeToken()
-                return AppResponse.success(Unit)
-            }
-
-            val error = result.getAppErrorByHttpErrorCode()
-            return AppResponse.failed(error)
-
-        } catch (e: IOException) {
-            return AppResponse.failed(AppError.PoorNetworkConnectionError)
-        } catch (e: HttpException) {
-            return AppResponse.failed(AppError.GeneralError(R.string.error_logout_failed))
-        }
-    }
-
     override suspend fun isLoggedIn(): AppResponse<Boolean> {
         try {
             val token = tokenManager.authToken ?: return AppResponse.Success(false)
