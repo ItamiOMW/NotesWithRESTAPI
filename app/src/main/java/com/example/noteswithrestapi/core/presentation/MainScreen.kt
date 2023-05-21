@@ -28,7 +28,7 @@ fun MainScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = true,
+        gesturesEnabled = false,
         drawerContent = {
             navBackstackEntry.value?.destination?.parent?.route?.let { currentGraph ->
                 AppDrawerContent(
