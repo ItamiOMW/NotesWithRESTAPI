@@ -1,8 +1,16 @@
 package com.example.noteswithrestapi.authentication_feature.presentation
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -64,12 +72,11 @@ fun NavGraphBuilder.authGraph(
                     }
                 },
                 onLoginSuccessful = {
-                    navController.navigate(Graph.NOTE_GRAPH) {
-                        navController.currentDestination?.id?.let { id ->
-                            this.popUpTo(id) {
-                                inclusive = true
-                            }
-                            launchSingleTop = true
+                    navController.navigate(
+                        Graph.NOTE_GRAPH,
+                    ) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
                         }
                     }
                     navController.graph.setStartDestination(Graph.NOTE_GRAPH)
@@ -129,7 +136,19 @@ fun NavGraphBuilder.authGraph(
                 onEvent = viewModel::onEvent
             )
         }
-        composable(Screen.ResetPassword.fullRoute) {
+        composable(
+            Screen.ResetPassword.fullRoute,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)
+                ).plus(fadeIn(tween(300)))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it }, animationSpec = tween(300, easing = LinearOutSlowInEasing)
+                ).plus(fadeOut(tween(300)))
+            }
+        ) {
             val viewModel: ResetPasswordViewModel = hiltViewModel()
             ResetPasswordScreen(
                 onResetCodeSentSuccessfully = { email ->

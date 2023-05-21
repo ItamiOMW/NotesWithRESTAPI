@@ -1,6 +1,13 @@
 package com.example.noteswithrestapi.note_feature.presentation
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -70,7 +77,19 @@ fun NavGraphBuilder.noteGraph(
                 onEvent = viewModel::onEvent
             )
         }
-        composable(Screen.AddNote.fullRoute) {
+        composable(
+            Screen.AddNote.fullRoute,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)
+                ).plus(fadeIn(tween(300)))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it }, animationSpec = tween(300, easing = LinearOutSlowInEasing)
+                ).plus(fadeOut(tween(300)))
+            }
+        ) {
             val viewModel: AddNoteViewModel = hiltViewModel()
             AddNoteScreen(
                 onSavedSuccessfully = {
@@ -90,7 +109,17 @@ fun NavGraphBuilder.noteGraph(
                 navArgument(Screen.NOTE_ID_ARG) {
                     type = NavType.IntType
                 }
-            )
+            ),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)
+                ).plus(fadeIn(tween(300)))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it }, animationSpec = tween(300, easing = LinearOutSlowInEasing)
+                ).plus(fadeOut(tween(300)))
+            }
         ) {
             val viewModel: EditNoteViewModel = hiltViewModel()
             EditNoteScreen(
@@ -102,7 +131,19 @@ fun NavGraphBuilder.noteGraph(
                 onEvent = viewModel::onEvent
             )
         }
-        composable(Screen.SearchNote.fullRoute) {
+        composable(
+            Screen.SearchNote.fullRoute,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)
+                ).plus(fadeIn(tween(300)))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it }, animationSpec = tween(300, easing = LinearOutSlowInEasing)
+                ).plus(fadeOut(tween(300)))
+            }
+        ) {
             val viewModel: SearchNoteViewModel = hiltViewModel()
             SearchNoteScreen(
                 onNavigateToEditNote = { id ->
