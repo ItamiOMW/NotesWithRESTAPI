@@ -1,6 +1,5 @@
 # Notes with REST API
 - Creade, Read, Update, Delete notes using REST API
-- [Figma](https://www.figma.com/file/Uh1s03nuQpyiPSysJKGxwa/Notes-Mobile-App?type=design&node-id=0%3A1&t=fYuWXLYK2FnPzWP9-1)
 - [REST API](https://github.com/ItamiOWM/drf-notes)
 
 ![Notes Thumbnail](https://github.com/ItamiOWM/NotesWithRESTAPI/blob/master/art/thumbnail.png)
